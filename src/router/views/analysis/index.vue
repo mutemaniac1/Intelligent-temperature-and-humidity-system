@@ -89,13 +89,13 @@ export default {
     async loadData() {
   try {
     // 读取实时数据文件
-    const realTimeFile = await fetch("/mqtt_data1.xlsx");
+    const realTimeFile = await fetch("/mqtt_data(2).xlsx");
     const realTimeBlob = await realTimeFile.blob();
     const realTimeWorkbook = xlsx.read(await realTimeBlob.arrayBuffer(), { type: "array" });
     const realTimeData = xlsx.utils.sheet_to_json(realTimeWorkbook.Sheets[realTimeWorkbook.SheetNames[0]]);
 
     // 读取全量数据文件
-    const historyFile = await fetch("/mqtt_data.xlsx");
+    const historyFile = await fetch("/predicted_data(1).xlsx");
     const historyBlob = await historyFile.blob();
     const historyWorkbook = xlsx.read(await historyBlob.arrayBuffer(), { type: "array" });
     const historyData = xlsx.utils.sheet_to_json(historyWorkbook.Sheets[historyWorkbook.SheetNames[0]]);
@@ -126,37 +126,37 @@ export default {
     });
 
     // 获取实时数据中的最后一个时间戳
-    const lastTimestamp = realTimeData.length > 0 
-      ? realTimeData[realTimeData.length - 1].Timestamp 
-      : "00:00:00"; // 如果实时数据为空，返回默认值
-      console.log(realTimeData[realTimeData.length - 1].Timestamp);
-    // 获取全量数据中，根据最后一个实时数据时间戳往后的60条数据
+    
     Object.values(groupedDevices).forEach((device) => {
-      const lastIndex = historyData.findIndex((row) => row.Timestamp === lastTimestamp);
-      const relevantHistoryData = historyData.slice(lastIndex, lastIndex + 60); // 获取全量数据中的60条
-      relevantHistoryData.forEach((row) => {
+
+      
+
+      
+      const lastHistoryData = historyData.slice(-60);
+        const historyTimeStamps = lastHistoryData.map(row => row.Timestamp);
         
-        if (row.deviceId === device.id) {
-          device.secondaryTemperatureData.push(row.Temperature);
-          device.secondaryHumidityData.push(row.Humidity);
-        }
-      });
+        device.secondaryTemperatureData = lastHistoryData
+          .filter(row => row.deviceId === device.id)
+          .map(row => row.Temperature);
+        device.secondaryHumidityData = lastHistoryData
+          .filter(row => row.deviceId === device.id)
+          .map(row => row.Humidity);
 
       // 合并实时数据和全量数据，展示360个数据点
       const realTimeDataSubset = device.temperatureData;
       const realTimeTimeStamps = device.timeStamps;
       const realTimehumidityData = device.humidityData;
       const fullHistoryData = device.secondaryTemperatureData.slice(-60);
-      const fullHistoryTimeStamps = relevantHistoryData.map(row => row.Timestamp);
+
       const fullHistoryDataSubset = fullHistoryData.slice(0, 60);
-      const fullHistoryTimeStampsSubset = fullHistoryTimeStamps.slice(-60);
+
       const fullHistoryData1 = device.secondaryHumidityData.slice(-60);
       const fullHistoryDataSubset1 = fullHistoryData1.slice(0, 60);
 
       // 合并实时数据和全量数据
-      device.temperatureData = realTimeDataSubset.concat(fullHistoryDataSubset);
-      device.timeStamps = realTimeTimeStamps.concat(fullHistoryTimeStampsSubset);
-      device.humidityData = realTimehumidityData.concat(fullHistoryDataSubset1);
+      device.temperatureData = realTimeDataSubset.concat(device.secondaryTemperatureData);
+      device.timeStamps = realTimeTimeStamps.concat(historyTimeStamps);
+      device.humidityData = realTimehumidityData.concat(device.secondaryHumidityData);
       device.secondaryTemperatureData = fullHistoryDataSubset;
       device.secondaryHumidityData = fullHistoryDataSubset1;
     });

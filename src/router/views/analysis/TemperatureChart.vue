@@ -54,7 +54,7 @@ export default {
           formatter: function (params) {
             let tip = '';
             params.forEach((param) => {
-              tip += `${param.seriesName} - ${param.data.value}℃ (${param.data.type}) 时间: ${param.data.timestamp}<br>`;
+              tip += `${param.seriesName} : ${param.data.value}℃ (${param.data.type}) 时间: ${param.data.timestamp}<br>`;
             });
             return tip;
           }
