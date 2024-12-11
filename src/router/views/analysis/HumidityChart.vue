@@ -41,6 +41,15 @@ export default {
         };
       });
 
+      // 计算湿度数据的最大最小值
+      const maxHumidity = Math.max(...realTimeData);
+      const minHumidity = Math.min(...realTimeData);
+      
+      // 计算湿度范围并向上/下取整到最接近的5的倍数
+      const humidityRange = maxHumidity - minHumidity;
+      const yMax = Math.min(100, Math.ceil((maxHumidity + humidityRange * 0.2) / 5) * 5); // 向上扩展20%并取整到5的倍数
+      const yMin = Math.max(0, Math.floor((minHumidity - humidityRange * 0.2) / 5) * 5);  // 向下扩展20%并取整到5的倍数
+
       // 配置图表选项
       const options = {
         title: {
@@ -68,7 +77,13 @@ export default {
         yAxis: {
           type: "value",
           axisLabel: {
-            formatter: "{value}%" // 显示湿度百分比
+            formatter: "{value}%"
+          },
+          min: yMin,
+          max: yMax,
+          interval: 5, // 设置刻度间隔为5
+          splitLine: {
+            show: true
           }
         },
         series: [

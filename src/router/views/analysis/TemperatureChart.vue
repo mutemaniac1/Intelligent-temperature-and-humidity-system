@@ -43,6 +43,15 @@ export default {
         };
       });
 
+      // 计算温度数据的最大最小值
+      const maxTemp = Math.max(...realTimeData);
+      const minTemp = Math.min(...realTimeData);
+      
+      // 计算温度范围并向上/下取整到最接近的整数区间
+      const tempRange = maxTemp - minTemp;
+      const yMax = Math.ceil((maxTemp + tempRange * 0.2) / 1) * 1;  // 向上扩展20%并取整
+      const yMin = Math.floor((minTemp - tempRange * 0.2) / 1) * 1; // 向下扩展20%并取整
+
       // 配置图表选项
       const options = {
         title: {
@@ -71,6 +80,12 @@ export default {
           type: "value",
           axisLabel: {
             formatter: "{value}℃"
+          },
+          min: yMin,
+          max: yMax,
+          interval: 1, // 设置刻度间隔为1
+          splitLine: {
+            show: true
           }
         },
         series: [
