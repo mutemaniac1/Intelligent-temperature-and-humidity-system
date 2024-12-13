@@ -89,13 +89,13 @@ export default {
     async loadData() {
   try {
     // 读取实时数据文件
-    const realTimeFile = await fetch("/mqtt_data(2).xlsx");
+    const realTimeFile = await fetch("/mqtt_data.xlsx");
     const realTimeBlob = await realTimeFile.blob();
     const realTimeWorkbook = xlsx.read(await realTimeBlob.arrayBuffer(), { type: "array" });
     const realTimeData = xlsx.utils.sheet_to_json(realTimeWorkbook.Sheets[realTimeWorkbook.SheetNames[0]]);
 
     // 读取全量数据文件
-    const historyFile = await fetch("/predicted_data(1).xlsx");
+    const historyFile = await fetch("/predicted_data.xlsx");
     const historyBlob = await historyFile.blob();
     const historyWorkbook = xlsx.read(await historyBlob.arrayBuffer(), { type: "array" });
     const historyData = xlsx.utils.sheet_to_json(historyWorkbook.Sheets[historyWorkbook.SheetNames[0]]);
@@ -133,32 +133,31 @@ export default {
 
       
       const lastHistoryData = historyData.slice(-60);
+      
         const historyTimeStamps = lastHistoryData.map(row => row.Timestamp);
-        
+        console.log(lastHistoryData.length);
         device.secondaryTemperatureData = lastHistoryData
-          .filter(row => row.deviceId === device.id)
           .map(row => row.Temperature);
         device.secondaryHumidityData = lastHistoryData
-          .filter(row => row.deviceId === device.id)
           .map(row => row.Humidity);
-
+console.log(device.secondaryTemperatureData.length);
+console.log(device.secondaryHumidityData.length);
       // 合并实时数据和全量数据，展示360个数据点
       const realTimeDataSubset = device.temperatureData;
       const realTimeTimeStamps = device.timeStamps;
       const realTimehumidityData = device.humidityData;
-      const fullHistoryData = device.secondaryTemperatureData.slice(-60);
+ 
 
-      const fullHistoryDataSubset = fullHistoryData.slice(0, 60);
+   
 
-      const fullHistoryData1 = device.secondaryHumidityData.slice(-60);
-      const fullHistoryDataSubset1 = fullHistoryData1.slice(0, 60);
 
       // 合并实时数据和全量数据
       device.temperatureData = realTimeDataSubset.concat(device.secondaryTemperatureData);
       device.timeStamps = realTimeTimeStamps.concat(historyTimeStamps);
       device.humidityData = realTimehumidityData.concat(device.secondaryHumidityData);
-      device.secondaryTemperatureData = fullHistoryDataSubset;
-      device.secondaryHumidityData = fullHistoryDataSubset1;
+
+      console.log(device.temperatureData.length);
+      console.log(device.humidityData.length);
     });
 
     // 计算温湿度统计值

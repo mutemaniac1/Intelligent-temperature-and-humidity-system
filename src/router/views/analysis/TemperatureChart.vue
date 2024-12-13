@@ -25,10 +25,10 @@ export default {
 
       // 获取实时数据和全量数据
       const realTimeData = this.temperatureData;
-
+console.log(realTimeData.length);
 
       // 获取时间戳，确保长度与温度数据一致
-      const realTimeTimestamps = this.timeStamps.slice(-realTimeData.length); // 最后N个时间戳
+      const realTimeTimestamps = this.timeStamps; // 最后N个时间戳
     
 
       // 合并实时数据和全量数据
@@ -39,7 +39,7 @@ export default {
         return {
           value: item,
           type: index < 300 ? '实时数据' : '预测数据', // 标识数据类型
-          timestamp: realTimeTimestamps[index] // 对应时间戳
+          timestamp: realTimeTimestamps[index] // 对���时间戳
         };
       });
 
